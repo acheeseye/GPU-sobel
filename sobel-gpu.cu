@@ -59,44 +59,55 @@ __global__ void test() {
 __global__ void GPU_sobel(int width, char *pixels, RGBQUAD *returnPixels) {
     RGBQUAD aPixel;
     int threadsPerBlock = THREAD_X * THREAD_Y;
+    int totalBlocks = gridDim.x * gridDim.y;
     int blockID = blockIdx.y * gridDim.x + blockIdx.x;
     int threadID = threadIdx.y * THREAD_X + threadIdx.x;
     int pixelID = blockID * threadsPerBlock + threadID;
     //printf("blockID(%d, %d, dimx: %d): %d, %d, %d\n", blockIdx.y, blockIdx.x, gridDim.x, blockID, threadID, pixelID);
-    aPixel.rgbRed = 0;
-    aPixel.rgbGreen = 0;
-    aPixel.rgbBlue = 0;
+    aPixel.rgbRed = 255;
+    aPixel.rgbGreen = 255;
+    aPixel.rgbBlue = 255;
 
     // if(0 < blockIdx.y && blockIdx.y < 11)
     // {
     //     aPixel.rgbRed = 255;
     // }
 
-    if(blockIdx.y == 0)
-    {
-        aPixel.rgbRed = 255;
-    }
-    if(blockIdx.y == 1)
-    {
-        aPixel.rgbGreen = 255;
-    }
-    if(blockIdx.y == 2)
-    {
-        aPixel.rgbGreen = 20;
-    }
-    if(blockIdx.x == 0)
-    {
-        aPixel.rgbBlue = 255;
-    }
-    if(blockIdx.x == 1)
-    {
-        aPixel.rgbRed = 111;
-    }
-    if(blockIdx.y == 3)
-    {
-        aPixel.rgbGreen = 80;
-    }
+    // if(blockIdx.y == 0)
+    // {
+    //     aPixel.rgbRed = 255;
+    // }
+    // if(blockIdx.y == 1)
+    // {
+    //     aPixel.rgbGreen = 255;
+    // }
+    // if(blockIdx.y == 2)
+    // {
+    //     aPixel.rgbGreen = 200;
+    // }
+    // if(blockIdx.x == 0)
+    // {
+    //     aPixel.rgbBlue = 255;
+    // }
+    // if(blockIdx.x == 1)
+    // {
+    //     aPixel.rgbRed = 111;
+    // }
+    // if(blockIdx.y == 2)
+    // {
+    //     aPixel.rgbGreen = 200;
+    // }
     //printf("(%d * %d + %d)(%d)+(%d * %d + %d) = %d\n", blockIdx.y, blockDim.x, blockIdx.x, threadsPerBlock, threadIdx.y, THREAD_X, threadIdx.x, pixelID);
+    //printf("%d %d \n", totalBlocks, totalBlocks * threadsPerBlock);
+    if( 0 <= pixelID && pixelID < /*replace with imgWidth ideally*/ gridDim.x * blockDim.x ||
+        (pixelID % (gridDim.x * blockDim.x)) == 0 ||
+        (pixelID % (gridDim.x * blockDim.x)) == (gridDim.x * blockDim.x - 1) ||
+        pixelID > (totalBlocks * threadsPerBlock) - (THREAD_X * gridDim.x))
+    {
+        aPixel.rgbRed = 0;
+        aPixel.rgbBlue = 0;
+        aPixel.rgbGreen = 0;
+    }
 
     returnPixels[pixelID] = aPixel;
 }
